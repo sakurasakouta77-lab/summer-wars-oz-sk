@@ -115,6 +115,76 @@ const sphereGroup = new THREE.Group();
 sphereGroup.add(sphere, ring1, ring2, ring3, ring4, topDisk, bottomDisk, halo, accentOrb);
 scene.add(sphereGroup);
 
+// iPhone 向けレスポンシブ設定（主要モデルの幅に合わせる）
+const responsiveConfig = {
+  breakpoints: {
+    se: 320,      // iPhone SE (1/2)
+    iphone: 375,  // iPhone 6/7/8/12 mini-ish
+    pro: 390,     // iPhone 12/13/14
+    plus: 428     // iPhone Plus / Max
+  },
+  settings: {
+    se: {
+      sphereScale: 0.22,
+      cameraZ: 34,
+      ringScale: 0.48,
+      topDiskScale: 0.5
+    },
+    iphone: {
+      sphereScale: 0.30,
+      cameraZ: 30,
+      ringScale: 0.56,
+      topDiskScale: 0.6
+    },
+    pro: {
+      sphereScale: 0.44,
+      cameraZ: 24,
+      ringScale: 0.74,
+      topDiskScale: 0.78
+    },
+    plus: {
+      sphereScale: 0.66,
+      cameraZ: 21,
+      ringScale: 0.88,
+      topDiskScale: 0.92
+    },
+    large: {
+      sphereScale: 0.95,
+      cameraZ: 20,
+      ringScale: 1.0,
+      topDiskScale: 1.0
+    }
+  }
+};
+
+function updateResponsiveLayout() {
+  const w = window.innerWidth;
+  let mode = 'large';
+  if (w <= responsiveConfig.breakpoints.se) mode = 'se';
+  else if (w <= responsiveConfig.breakpoints.iphone) mode = 'iphone';
+  else if (w <= responsiveConfig.breakpoints.pro) mode = 'pro';
+  else if (w <= responsiveConfig.breakpoints.plus) mode = 'plus';
+
+  const cfg = responsiveConfig.settings[mode];
+
+  // 球体全体のスケール
+  sphereGroup.scale.set(cfg.sphereScale, cfg.sphereScale, cfg.sphereScale);
+
+  // カメラ位置の調整
+  camera.position.set(0, 0, cfg.cameraZ);
+  camera.updateProjectionMatrix();
+
+  // リングのスケールを個別に調整
+  [ring1, ring2, ring3, ring4].forEach(r => r.scale.set(cfg.ringScale, cfg.ringScale, cfg.ringScale));
+
+  // トップとアクセントのスケール
+  topDisk.scale.set(cfg.topDiskScale, cfg.topDiskScale, cfg.topDiskScale);
+  accentOrb.scale.set(cfg.topDiskScale, cfg.topDiskScale, cfg.topDiskScale);
+}
+
+// 初期レイアウト適用
+updateResponsiveLayout();
+
 // アニメーション
 function animate() {
   requestAnimationFrame(animate);
@@ -133,4 +203,6 @@ window.addEventListener("resize", () => {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
+  // レスポンシブレイアウトを再適用
+  updateResponsiveLayout();
 });
