@@ -144,3 +144,42 @@ body::after {
     background-position: 156px 156px, 156px 156px;
   }
 }
+
+/* Speech bubble for the sphere */
+.speech {
+  position: absolute;
+  pointer-events: none;
+  transform: translate(-50%, -120%);
+  background: rgba(255,255,255,0.96);
+  color: #061427;
+  padding: 18px 24px;
+  border-radius: 22px;
+  font-weight: 700;
+  font-size: 1.6rem;
+  box-shadow: 0 12px 30px rgba(22,48,86,0.12), inset 0 1px 0 rgba(255,255,255,0.6);
+  border: 1px solid rgba(6,20,40,0.06);
+  white-space: nowrap;
+  max-width: 72vw;
+  z-index: 40;
+}
+
+.speech::after {
+  content: '';
+  position: absolute;
+  bottom: -16px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 28px;
+  height: 28px;
+  background: rgba(255,255,255,0.96);
+  border-left: 1px solid rgba(6,20,40,0.06);
+  border-bottom: 1px solid rgba(6,20,40,0.06);
+}
+
+@media (max-width: 420px) {
+  .speech {
+    font-size: 1.2rem;
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+}

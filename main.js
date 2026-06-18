@@ -185,13 +185,62 @@ function updateResponsiveLayout() {
 // 初期レイアウト適用
 updateResponsiveLayout();
 
+// --- Speech bubble DOM overlay ---
+const speech = document.createElement('div');
+speech.className = 'speech';
+document.body.appendChild(speech);
+
+// 日本時間に基づいて吹き出し文を更新
+function updateSpeechTextByJapanTime() {
+  try {
+    const now = new Date();
+    const hourStr = new Intl.DateTimeFormat('ja-JP', { hour: 'numeric', hour12: false, timeZone: 'Asia/Tokyo' }).format(now);
+    const hour = parseInt(hourStr, 10);
+    // デフォルトを夜の挨拶にして、時間帯ごとに上書きする
+    let msg = 'こんばんは。OZへようこそ！';
+    // 03:00〜10:59 を「おはようございます」にする
+    if (hour >= 3 && hour < 11) {
+      msg = 'おはようございます。OZへようこそ！';
+    } else if (hour >= 11 && hour < 15) {
+      // 11:00〜14:59 を「こんにちは」にする
+      msg = 'こんにちは。OZへようこそ！';
+    }
+    speech.textContent = msg;
+  } catch (e) {
+    speech.textContent = 'こんにちは、OZへようこそ！';
+  }
+}
+
+// 初期設定と定期更新（1分ごと）
+updateSpeechTextByJapanTime();
+setInterval(updateSpeechTextByJapanTime, 60 * 1000);
+
+const _vec = new THREE.Vector3();
+const _pos = new THREE.Vector3();
+
+function updateSpeechPosition() {
+  // ローカルの吹き出し基準位置（球体の上）
+  const localY = sphere.geometry.parameters.radius || 4.6;
+  _pos.set(0, localY + 0.8, 0); // 少し上にオフセット
+  // ローカル座標をワールドに変換
+  sphereGroup.localToWorld(_pos);
+  // カメラ投影座標へ
+  _vec.copy(_pos).project(camera);
+  const x = (_vec.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-_vec.y * 0.5 + 0.5) * window.innerHeight;
+  // 表示位置を更新
+  speech.style.left = `${x}px`;
+  speech.style.top = `${y}px`;
+}
+
+
 // アニメーション
 function animate() {
   requestAnimationFrame(animate);
 
   sphereGroup.rotation.y += 0.002; // ゆっくり回転
-
   controls.update();
+  updateSpeechPosition();
   renderer.render(scene, camera);
 }
 animate();
@@ -205,4 +254,6 @@ window.addEventListener("resize", () => {
   renderer.setSize(w, h);
   // レスポンシブレイアウトを再適用
   updateResponsiveLayout();
+  // 吹き出し位置も再計算
+  updateSpeechPosition();
 });
